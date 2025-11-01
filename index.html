@@ -122,7 +122,7 @@ overflow: hidden;
 
 
 <button id="upgrade-speed-button">Upgrade Speed: 1 Metallic Orb</button>
-<audio id="eat-sfx" src="" preload="auto"></audio>
+<audio id="eat-sfx" src="https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/pop-423717.mp3" preload="auto"></audio>
 
 
 
@@ -147,6 +147,9 @@ const sizeLabel = document.querySelector("#size-label");
 const speedLabel = document.querySelector("#speed-label");
 const metallicBallsSwallowedLabel = document.querySelector("#metallic-balls-swallowed-label");
 const upgradeSpeedButton = document.querySelector("#upgrade-speed-button");
+
+const eatSfx = document.querySelector("#eat-sfx");
+
 // ========================
 // ⚙️VARIABLES⚙️
 // ========================
@@ -365,6 +368,8 @@ foods.forEach(function(food) {
     const foodBox = new THREE.Box3().setFromObject(food);
 
     if(ballBox.intersectsBox(foodBox)) {
+        eatSfx.currentTime = 0;
+        eatSfx.play();
         foodBox.getSize(foodSize);
         ballBox.getSize(playerSize);
         if(foodSize.x /2 > playerSize.x /2) {
