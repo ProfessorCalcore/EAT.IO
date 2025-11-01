@@ -371,6 +371,7 @@ foods.forEach(function(food) {
         ballBox.getSize(playerSize);
         if(foodSize.x /2 > playerSize.x /2) {
             alert("You got eaten! Game Over");
+            alert("Balls Swallowed: " + ballsSwallowed)
             location.reload();
         }
 
@@ -387,7 +388,7 @@ foods.forEach(function(food) {
 	let max = 50
         let min = -50;
         ballBox.getSize(playerSize);
-        camRadius = playerSize.x * 10;
+        camRadius = playerSize.x + 4;
 
         let randomx = Math.floor(Math.random() * (max-min) + min);
         let randomz = Math.floor(Math.random() * (max - min) + min);
