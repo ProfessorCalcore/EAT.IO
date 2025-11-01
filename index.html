@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>Hello</title>
+<style>
+
+body{
+background: black;
+margin: 0;
+overflow: hidden;
+}
+
+#buttons-container{
+    position: absolute;
+    top: 70%;
+    left: 46%;
+    width: 200px;
+    height: 100px;
+    display: inline;
+}
+
+#up{
+    position: relative;
+    background: transparent;
+    outline: none;
+    border: 0;
+    font-size: 300%;
+}
+
+#left{
+    position: relative;
+    background: transparent;
+    outline: none;
+    border: 0;
+    font-size: 300%;
+    top: 30%;
+    left: -85%;
+}
+
+#right{
+    position: relative;
+    background: transparent;
+    outline: none;
+    border: 0;
+    font-size: 300%;
+    top: -30%;
+    left: 0%;
+}
+
+#down{
+    position: relative;
+    outline: none;
+    border: 0;
+    background: transparent;
+    font-size: 300%;
+}
+
+#balls-swallowed-label{
+    position: absolute;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+}
+
+#metallic-balls-swallowed-label{
+    position: absolute;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    top: 5%;
+}
+
+#size-label{
+    position: absolute;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    top: 10%;
+}
+
+#speed-label{
+    position: absolute;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    top: 15%;
+}
+
+
+#upgrade-speed-button{
+    position: absolute;
+    background-color: black;
+    color: white;
+    top: 20%;
+    font-size: 20px;
+}
+
+</style>
+
+    </head>
+
+    <body>
+<div id="buttons-container">
+    <button id="up">⬆️</button>
+    <button id="left">⬅️</button>
+    <button id="down">⬇️</button>
+    <button id="right">➡️</button>
+</div>
+
+<label id="balls-swallowed-label">Balls Swallowed: 0</label>
+<label id="metallic-balls-swallowed-label">Metallic Balls Swallowed: 0</label>
+
+
+
+<label id="size-label">Size: 0.02</label>
+<label id="speed-label">Speed: 0.02</label>
+
+
+<button id="upgrade-speed-button">Upgrade Speed: 1 Metallic Orb</button>
+
+
+
+<script type="module">
+// ========================
+// ⚙️THREE.JS⚙️
+// ========================
+import * as THREE from "https://unpkg.com/three@0.170.0/build/three.module.js";
+
+
+// ========================
+// ⚙️GUI SET UP⚙️
+// ========================
+const buttonsContainer = document.querySelector("#buttons-container");
+const up = document.querySelector("#up");
+const down = document.querySelector("#down");
+const left = document.querySelector("#left");
+const right = document.querySelector("#right");
+
+const ballsSwallowedLabel = document.querySelector("#balls-swallowed-label");
+const sizeLabel = document.querySelector("#size-label");
+const speedLabel = document.querySelector("#speed-label");
+const metallicBallsSwallowedLabel = document.querySelector("#metallic-balls-swallowed-label");
+const upgradeSpeedButton = document.querySelector("#upgrade-speed-button");
+// ========================
+// ⚙️VARIABLES⚙️
+// ========================
+let angle = 0;
+let speed = 0.02;
+let camAngle = 0;
+let camRadius = 5;
+let currentFood = null;
+const keys = {};
+let ballsSwallowed = 0;
+let originalRadius = 0.02;
+const foodSize = new THREE.Vector3();
+const playerSize = new THREE.Vector3();
+let metallicBalls = 0;
+let speedCost = 1;
+
+
+// ========================
+// ⬆️DISPLAYS MOBILE BUTTONS⬆️
+// ========================
+let mobileCheck = prompt
+(`Are you playing on mobile/tablet? This will enable mobile controls.
+Type Y to activate Mobile Controls
+Type N to use default Laptop Controls`);
+if(mobileCheck === "N") buttonsContainer.style.display = "none";
+
+// ========================
+// UPGRADE SPEED
+// ========================
+upgradeSpeedButton.addEventListener("click", function() {
+    if(metallicBalls >= speedCost) {
+        metallicBalls -= speedCost;
+        metallicBallsSwallowedLabel.textContent = "Metallic Balls Swallowed: " + metallicBalls;
+        speedCost *= 5;
+        upgradeSpeedButton.textContent = "Upgrade Speed: " + speedCost + " Metallic Orbs";
+        speed += 0.01;
+        speedLabel.textContent = "Speed: " + speed;
+
+    }
+});
+
+
+// ========================
+// 🎮MOBILE/LAPTOP MOVEMENT TRIGGERS🎮
+// ========================
+document.body.addEventListener("keydown", function(event){
+    keys[event.key] = true;
+});
+document.body.addEventListener("keyup", function(event){
+    keys[event.key] = false;
+});
+up.addEventListener("touchstart", function() {
+    keys["w"] = true;
+});
+up.addEventListener("touchend", function() {
+    keys["w"] = false;
+});
+down.addEventListener("touchstart", function() {
+    keys["s"] = true;
+});
+down.addEventListener("touchend", function() {
+    keys["s"] = false;
+});
+right.addEventListener("touchstart", function() {
+    keys["ArrowRight"] = true;
+});
+right.addEventListener("touchend", function() {
+    keys["ArrowRight"] = false;
+});
+left.addEventListener("touchstart", function() {
+    keys["ArrowLeft"] = true;
+});
+left.addEventListener("touchend", function() {
+    keys["ArrowLeft"] = false;
+});
+
+// ========================
+// 🎬SCENE, CAMERA AND RENDERER SETUP🎬
+// ========================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("rgb(135, 206, 235)");
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/ window.innerHeight, 1, 1000);
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// ========================
+// ☀️SUN SET UP☀️
+// ========================
+const sunGeometry = new THREE.SphereGeometry(5,100,100);
+const sunMaterial = new THREE.MeshStandardMaterial({
+color: "white",
+emissive: "white",
+emissiveIntensity: 100,
+});
+const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+sun.position.set(0,10,-100)
+scene.add(sun);
+
+// ========================
+// 🔴PLAYER-SPRITE SET UP🔴
+// ========================
+const playerGeometry = new THREE.SphereGeometry(0.2,100,100);
+const playerMaterial = new THREE.MeshStandardMaterial({
+    color: "silver",
+    roughness: 0,
+    metalness: 1,
+   
+
+});
+const playerSprite = new THREE.Mesh(playerGeometry, playerMaterial);
+playerSprite.position.copy(camera.position);
+playerSprite.position. y = 5;
+scene.add(playerSprite);
+
+// ========================
+// 💡LIGHT SET UP💡
+// ========================
+const light = new THREE.PointLight("white", 10000000, 1000);
+light.position.copy(sun.position);
+light.position.z += 10;
+scene.add(light);
+
+// ========================
+// 🟩FLOOR SET UP🟩
+// ========================
+const floorGeometry = new THREE.PlaneGeometry(200,200,200);
+const floorMaterial = new THREE.MeshStandardMaterial({
+color: "green",
+side: THREE.DoubleSide,
+roughness: 0.1,
+metalness: 0.9,
+});
+const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.rotation.x = Math.PI/2;
+scene.add(floor);
+
+
+const foods = [];
+
+// ========================
+// 🟡FOOD SET UP🟡
+// ========================
+for(let i=0; i < 50; i++) {
+    const foodGeo = new THREE.SphereGeometry(0.1, 10, 10);
+    const foodMat = new THREE.MeshBasicMaterial({color: "white"});
+    const food = new THREE.Mesh(foodGeo, foodMat);
+
+    let max = 50;
+    let min = -50;
+
+    let randomx = Math.floor(Math.random() * (max-min) + min);
+    let randomz = Math.floor(Math.random() * (max-min) + min);
+
+    food.position.set(randomx, 5, randomz);
+    foods.push(food);
+    scene.add(food);
+}
+// ========================
+// 📦BOX BOUNDARY📦
+// ========================
+const ballBox = new THREE.Box3().setFromObject(playerSprite);
+foods.forEach(function(food) {
+    const foodBox = new THREE.Box3().setFromObject(food);
+});
+
+// ========================
+// 🧬RECREATE FOOD FUNCTION🧬
+// ========================
+function recreateFood() {
+    ballsSwallowed += 1;
+    ballsSwallowedLabel.textContent = "Balls Swallowed: " + ballsSwallowed; 
+
+let colors = [
+  "red", "green", "blue", "yellow", "orange", "purple", "pink", "cyan",
+  "lime", "magenta", "brown", "teal", "navy", "maroon", "olive", "silver",
+  "gray", "black", "white", "gold", "coral", "turquoise", "violet", "indigo",
+  "salmon", "khaki", "plum", "orchid", "peru", "tan", "lavender", "crimson",
+  "aqua", "beige", "chocolate", "firebrick", "forestgreen", "fuchsia", "hotpink"
+];
+
+let randomColor = Math.floor(Math.random() * colors.length);
+
+    let playerRadius = playerSprite.geometry.parameters.radius;
+    let randomr = Math.random() * 2 + 0.1;
+
+    const foodGeo = new THREE.SphereGeometry(randomr,100,100);
+    const foodMat = new THREE.MeshStandardMaterial({
+        color: colors[randomColor],
+	roughness: 0,
+	metalness: 1,
+    });
+    const food = new THREE.Mesh(foodGeo, foodMat);
+
+    let max = 80;
+    let min = -80;
+
+    let randomx = Math.floor(Math.random() * (max - min) + min);
+    let randomz = Math.floor(Math.random() * (max - min) + min);
+
+    food.position.set(randomx,5,randomz);
+    const foodBox = new THREE.Box3().setFromObject(food)
+    foods.push(food);
+    scene.add(food);
+}
+
+let angle3 = 0;
+// ========================
+// 🎬ANIMATION FUNCTION🎬
+// ========================
+function animate() {
+    requestAnimationFrame(animate);
+    ballBox.setFromObject(playerSprite);
+foods.forEach(function(food) {
+    const foodBox = new THREE.Box3().setFromObject(food);
+
+    if(ballBox.intersectsBox(foodBox)) {
+        foodBox.getSize(foodSize);
+        ballBox.getSize(playerSize);
+        if(foodSize.x /2 > playerSize.x /2) {
+            alert("You got eaten! Game Over");
+            location.reload();
+        }
+
+        if(foodSize.x/2 > 0.11) {
+            metallicBalls += 1;
+            metallicBallsSwallowedLabel.textContent = "Metallic Balls Swallowed: " + metallicBalls;      
+        }
+        scene.remove(currentFood);
+        food.geometry.dispose();
+        food.material.dispose();
+        recreateFood();
+
+
+	let max = 50
+        let min = -50;
+        ballBox.getSize(playerSize);
+        camRadius = playerSize.x * 10;
+
+        let randomx = Math.floor(Math.random() * (max-min) + min);
+        let randomz = Math.floor(Math.random() * (max - min) + min);
+
+        food.position.set(randomx, 5, randomz);
+        playerSprite.scale.multiplyScalar(1.01);
+        let scale = foodSize.x/2 - 0.05;
+        scale /= 10;
+        scale += 1;
+
+        originalRadius *= scale;
+        originalRadius = originalRadius.toFixed(5);
+        sizeLabel.textContent = "Size: " + originalRadius;
+
+
+
+
+
+    }
+
+});
+
+
+
+
+    let camHeight = 3;
+
+    camera.position.x = playerSprite.position.x + camRadius * Math.sin(camAngle);
+    camera.position.z = playerSprite.position.z + camRadius * Math.cos(camAngle);
+    camera.position.y = playerSprite.position.y + camHeight;
+    camera.lookAt(playerSprite.position);
+
+    angle += 0.00002;
+    const orbitRadius = 200;
+
+    sun.position.z = orbitRadius * Math.cos(angle);
+    sun.position.y = orbitRadius * Math.sin(angle);
+    if(sun.position.y < -5) scene.background = new THREE.Color("#04081c");
+    else if(sun.position.y >= -4) scene.background = new THREE.Color("skyblue");
+    light.position.copy(sun.position);
+
+// ========================
+// 🎮KEY PRESSES🎮
+// ========================
+if(keys["w"]) {
+    playerSprite.position.z -= Math.cos(camAngle) * speed;
+    playerSprite.position.x -= Math.sin(camAngle) * speed;
+    
+}
+
+if(keys["s"]) {
+    playerSprite.position.z += Math.cos(camAngle) * speed;
+    playerSprite.position.x += Math.sin(camAngle) * speed;
+
+}
+
+if(keys["d"]) {
+    playerSprite.position.x += Math.cos(camAngle) * speed;
+    playerSprite.position.z -= Math.sin(camAngle) * speed;
+}
+
+if(keys["a"]) {
+    playerSprite.position.x -= Math.cos(camAngle) * speed;
+    playerSprite.position.z += Math.sin(camAngle) * speed;
+}
+
+if(keys["ArrowRight"]) {
+    camAngle -= 0.01;
+}
+
+if(keys["ArrowLeft"]) {
+    camAngle += 0.01
+}
+renderer.render(scene, camera);
+}
+animate();
+
+// ========================
+// END OF SCRIPT
+// ========================
+</script>
+    </body>
+</html>
