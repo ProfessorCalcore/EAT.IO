@@ -129,7 +129,7 @@ overflow: hidden;
 <script type="module">
 // ========================
 // ⚙️THREE.JS⚙️
-// ========================
+// ======================== 
 import * as THREE from "https://unpkg.com/three@0.170.0/build/three.module.js";
 
 
@@ -165,6 +165,36 @@ const foodSize = new THREE.Vector3();
 const playerSize = new THREE.Vector3();
 let metallicBalls = 0;
 let speedCost = 1;
+let sunDied = false;
+let colors = [
+  "red","green","blue","yellow","orange","purple","pink","cyan",
+  "lime","magenta","brown","teal","navy","maroon","olive","silver",
+  "gray","black","white","gold","coral","turquoise","violet","indigo",
+  "salmon","khaki","plum","orchid","peru","tan","lavender","crimson",
+  "aqua","beige","chocolate","firebrick","forestgreen","fuchsia","hotpink",
+  "skyblue","mintcream","powderblue","seagreen","tomato","sienna",
+  "slateblue","steelblue","mediumvioletred","mediumslateblue","mediumorchid",
+  "springgreen","mediumseagreen","midnightblue","palegoldenrod","peachpuff",
+  "papayawhip","moccasin","ivory","honeydew","gainsboro","darkslategray",
+  "darkolivegreen","darkorange","darkorchid","darkred","darksalmon",
+  "darkseagreen","darkslateblue","darkturquoise","darkviolet","deeppink",
+  "deepskyblue","dimgray","dodgerblue","firebrick","floralwhite","forestgreen",
+  "fuchsia","gainsboro","ghostwhite","goldenrod","gray","greenyellow","honeydew",
+  "hotpink","indianred","indigo","ivory","khaki","lavender","lavenderblush",
+  "lawngreen","lemonchiffon","lightblue","lightcoral","lightcyan","lightgoldenrodyellow",
+  "lightgreen","lightgrey","lightpink","lightsalmon","lightseagreen","lightskyblue",
+  "lightslategray","lightsteelblue","lightyellow","limegreen","linen","magenta",
+  "mediumaquamarine","mediumblue","mediumorchid","mediumpurple","mediumseagreen",
+  "mediumslateblue","mediumspringgreen","mediumturquoise","mediumvioletred",
+  "midnightblue","mintcream","mistyrose","moccasin","navajowhite","oldlace",
+  "olivedrab","orangered","orchid","palegoldenrod","palegreen","paleturquoise",
+  "palevioletred","papayawhip","peachpuff","peru","pink","plum","powderblue",
+  "rosybrown","royalblue","saddlebrown","salmon","sandybrown","seagreen",
+  "seashell","sienna","skyblue","slateblue","slategray","snow","springgreen",
+  "steelblue","tan","thistle","tomato","turquoise","violet","wheat","whitesmoke",
+  "yellowgreen","rebeccapurple","aliceblue","antiquewhite","aquamarine","azure"
+];
+
 
 
 // ========================
@@ -205,10 +235,7 @@ up.addEventListener("touchstart", function() {
     keys["w"] = true;
 });
 down.addEventListener("touchstart", function() {
-    keys["s"] = true;
-});
-down.addEventListener("touchend", function() {
-    keys["s"] = false;
+    keys["w"] = false;;
 });
 right.addEventListener("touchstart", function() {
     keys["ArrowRight"] = true;
@@ -228,7 +255,7 @@ left.addEventListener("touchend", function() {
 // ========================
 const scene = new THREE.Scene();
 scene.background = new THREE.Color("rgb(135, 206, 235)");
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/ window.innerHeight, 1, 1000);
+const camera = new THREE.PerspectiveCamera(85, window.innerWidth/ window.innerHeight, 1, 1000);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -244,7 +271,7 @@ emissive: "white",
 emissiveIntensity: 100,
 });
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-sun.position.set(0,10,-100)
+sun.position.set(0,10,-1000)
 scene.add(sun);
 
 // ========================
@@ -266,7 +293,7 @@ scene.add(playerSprite);
 // ========================
 // 💡LIGHT SET UP💡
 // ========================
-const light = new THREE.PointLight("white", 10000000, 1000);
+const light = new THREE.PointLight("white", 50000000, 10000);
 light.position.copy(sun.position);
 light.position.z += 10;
 scene.add(light);
@@ -274,9 +301,10 @@ scene.add(light);
 // ========================
 // 🟩FLOOR SET UP🟩
 // ========================
-const floorGeometry = new THREE.PlaneGeometry(200,200,200);
+let randomfloorcolor = Math.floor(Math.random() * colors.length);
+const floorGeometry = new THREE.PlaneGeometry(200,400,200);
 const floorMaterial = new THREE.MeshStandardMaterial({
-color: "green",
+color: "lime",
 side: THREE.DoubleSide,
 roughness: 0.1,
 metalness: 0.9,
@@ -286,13 +314,43 @@ floor.rotation.x = Math.PI/2;
 scene.add(floor);
 
 
-const foods = [];
+// ========================
+// Wall SET UP
+// ========================
+const wallGeo = new THREE.PlaneGeometry(200,4);
+const wallMat = new THREE.MeshBasicMaterial({color: "black"});
+const wallGeo2 = new THREE.PlaneGeometry(400,4);
 
+const nwall = new THREE.Mesh(wallGeo, wallMat);
+nwall.position.z -= 200;
+nwall.position.y += 2;
+
+const swall = new THREE.Mesh(wallGeo, wallMat);
+swall.position.z += 200;
+swall.position.y += 2;
+swall.rotation.y = Math.PI;
+
+const ewall = new THREE.Mesh(wallGeo2, wallMat);
+ewall.position.x += 100;
+ewall.position.y += 2;
+ewall.rotation.y = -Math.PI/2;
+
+const wwall = new THREE.Mesh(wallGeo2, wallMat);
+wwall.position.x -= 100;
+wwall.position.y += 2;
+wwall.rotation.y = Math.PI/2;
+
+
+scene.add(nwall, ewall, wwall);
+
+
+const foods = [];
 // ========================
 // 🟡FOOD SET UP🟡
 // ========================
-for(let i=0; i < 50; i++) {
+for(let i=0; i < 100; i++) {
     const foodGeo = new THREE.SphereGeometry(0.1, 10, 10);
+
     const foodMat = new THREE.MeshBasicMaterial({color: "white"});
     const food = new THREE.Mesh(foodGeo, foodMat);
 
@@ -300,9 +358,10 @@ for(let i=0; i < 50; i++) {
     let min = -50;
 
     let randomx = Math.floor(Math.random() * (max-min) + min);
-    let randomz = Math.floor(Math.random() * (max-min) + min);
+    let randomz = Math.floor(Math.random() * ((max*2)-min) + min);
 
     food.position.set(randomx, 5, randomz);
+    food.orbit = food.position.clone();
     foods.push(food);
     scene.add(food);
 }
@@ -313,7 +372,8 @@ const ballBox = new THREE.Box3().setFromObject(playerSprite);
 foods.forEach(function(food) {
     const foodBox = new THREE.Box3().setFromObject(food);
 });
-
+    let max = 100;
+    let min = -100;
 // ========================
 // 🧬RECREATE FOOD FUNCTION🧬
 // ========================
@@ -321,18 +381,16 @@ function recreateFood() {
     ballsSwallowed += 1;
     ballsSwallowedLabel.textContent = "Balls Swallowed: " + ballsSwallowed; 
 
-let colors = [
-  "red", "green", "blue", "yellow", "orange", "purple", "pink", "cyan",
-  "lime", "magenta", "brown", "teal", "navy", "maroon", "olive", "silver",
-  "gray", "black", "white", "gold", "coral", "turquoise", "violet", "indigo",
-  "salmon", "khaki", "plum", "orchid", "peru", "tan", "lavender", "crimson",
-  "aqua", "beige", "chocolate", "firebrick", "forestgreen", "fuchsia", "hotpink"
-];
+
+
 
 let randomColor = Math.floor(Math.random() * colors.length);
+    ballBox.getSize(playerSize);
+    let minr = playerSize.x/5;
+    let maxr = playerSize.x * 5;
 
     let playerRadius = playerSprite.geometry.parameters.radius;
-    let randomr = Math.random() * 2 + 0.1;
+    let randomr = Math.random() * (maxr - minr) + minr;
 
     const foodGeo = new THREE.SphereGeometry(randomr,100,100);
     const foodMat = new THREE.MeshStandardMaterial({
@@ -342,35 +400,53 @@ let randomColor = Math.floor(Math.random() * colors.length);
     });
     const food = new THREE.Mesh(foodGeo, foodMat);
 
-    let max = 80;
-    let min = -80;
-
     let randomx = Math.floor(Math.random() * (max - min) + min);
     let randomz = Math.floor(Math.random() * (max - min) + min);
 
     food.position.set(randomx,5,randomz);
+    food.orbit = food.position.clone();
+    food.angle = Math.random() * 360;
+
     const foodBox = new THREE.Box3().setFromObject(food)
     foods.push(food);
     scene.add(food);
 }
 
-let angle3 = 0;
+foods.forEach(function(food) {
+    let randomAngle = Math.random() * 360;
+    food.angle = randomAngle;
+});
+
 // ========================
 // 🎬ANIMATION FUNCTION🎬
 // ========================
 function animate() {
     requestAnimationFrame(animate);
+    const sunBox = new THREE.Box3().setFromObject(sun);
+
     ballBox.setFromObject(playerSprite);
 foods.forEach(function(food) {
     const foodBox = new THREE.Box3().setFromObject(food);
-	foodBox.expandByScalar(-0.1);
 
 
     if(ballBox.intersectsBox(foodBox)) {
         eatSfx.currentTime = 0;
         eatSfx.play();
+        food.angle = 100;
+
         foodBox.getSize(foodSize);
         ballBox.getSize(playerSize);
+
+        let scale = 1 + (foodSize.x/20);
+        if(scale >= 1.25) scale = 1.25;
+        playerSprite.scale.multiplyScalar(scale);
+        originalRadius = originalRadius * scale;
+        originalRadius = originalRadius.toFixed(4);
+        sizeLabel.textContent = "Size: " + originalRadius;
+
+ 
+
+
         if(foodSize.x /2 > playerSize.x /2) {
             alert("You got eaten! Game Over");
             alert("Balls Swallowed: " + ballsSwallowed)
@@ -381,10 +457,6 @@ foods.forEach(function(food) {
             metallicBalls += 1;
             metallicBallsSwallowedLabel.textContent = "Metallic Balls Swallowed: " + metallicBalls;      
         }
-        scene.remove(currentFood);
-        food.geometry.dispose();
-        food.material.dispose();
-        recreateFood();
 
 
 	let max = 50
@@ -395,21 +467,29 @@ foods.forEach(function(food) {
         let randomx = Math.floor(Math.random() * (max-min) + min);
         let randomz = Math.floor(Math.random() * (max - min) + min);
 
-        food.position.set(randomx, 5, randomz);
-        playerSprite.scale.multiplyScalar(1.01);
-        let scale = foodSize.x/2 - 0.05;
-        scale /= 10;
-        scale += 1;
-
-        originalRadius *= scale;
-        originalRadius = originalRadius.toFixed(5);
-        sizeLabel.textContent = "Size: " + originalRadius;
-
-
-
-
+        food.position.set(randomx, 5, randomz);      
+        recreateFood();
 
     }
+
+    if(ballBox.intersectsBox(sunBox)) {
+        scene.remove(sun); 
+        sunDied = true;
+        light.position.copy(playerSprite.position);
+        light.intensity = 100;
+        scene.background = new THREE.Color("black");
+        
+    }
+
+
+
+    foods.forEach(function(food) {
+        if(!food.orbit) return;
+        food.angle += 0.000003;
+        food.position.x = food.orbit.x + 50 * Math.cos(food.angle);
+        food.position.z = food.orbit.z + 50 * Math.sin(food.angle);
+    });
+
 
 });
 
@@ -424,13 +504,14 @@ foods.forEach(function(food) {
     camera.lookAt(playerSprite.position);
 
     angle += 0.00002;
-    const orbitRadius = 200;
+    const orbitRadius = 800;
 
     sun.position.z = orbitRadius * Math.cos(angle);
     sun.position.y = orbitRadius * Math.sin(angle);
-    if(sun.position.y < -5) scene.background = new THREE.Color("#04081c");
-    else if(sun.position.y >= -4) scene.background = new THREE.Color("skyblue");
-    light.position.copy(sun.position);
+    if(sun.position.y < -5 && !sunDied) scene.background = new THREE.Color("#04081c");
+    else if(sun.position.y >= -4 && !sunDied) scene.background = new THREE.Color("skyblue");
+    if(!sunDied) light.position.copy(sun.position);
+    if(sunDied) light.position.copy(playerSprite.position);
 
 // ========================
 // 🎮KEY PRESSES🎮
@@ -474,6 +555,7 @@ animate();
 </script>
     </body>
 </html>
+
 
 
 
