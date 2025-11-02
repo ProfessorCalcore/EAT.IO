@@ -363,6 +363,8 @@ function animate() {
     ballBox.setFromObject(playerSprite);
 foods.forEach(function(food) {
     const foodBox = new THREE.Box3().setFromObject(food);
+	foodBox.expandByScalar(-0.1);
+
 
     if(ballBox.intersectsBox(foodBox)) {
         eatSfx.currentTime = 0;
@@ -472,6 +474,7 @@ animate();
 </script>
     </body>
 </html>
+
 
 
 
