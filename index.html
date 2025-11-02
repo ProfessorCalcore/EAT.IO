@@ -117,8 +117,8 @@ overflow: hidden;
 
 
 
-<label id="size-label">Size: 0.2</label>
-<label id="speed-label">Speed: 0.02</label>
+<label id="size-label">Size: 0.12</label>
+<label id="speed-label">Speed: 0.05</label>
 
 
 <button id="upgrade-speed-button">Upgrade Speed: 1 Metallic Orb</button>
@@ -160,7 +160,7 @@ let camRadius = 5;
 let currentFood = null;
 const keys = {};
 let ballsSwallowed = 0;
-let originalRadius = 0.2;
+let originalRadius = 0.12;
 const foodSize = new THREE.Vector3();
 const playerSize = new THREE.Vector3();
 let metallicBalls = 0;
@@ -250,7 +250,7 @@ scene.add(sun);
 // ========================
 // 🔴PLAYER-SPRITE SET UP🔴
 // ========================
-const playerGeometry = new THREE.SphereGeometry(0.2,100,100);
+const playerGeometry = new THREE.SphereGeometry(0.12,100,100);
 const playerMaterial = new THREE.MeshStandardMaterial({
     color: "silver",
     roughness: 0,
@@ -472,6 +472,7 @@ animate();
 </script>
     </body>
 </html>
+
 
 
 
