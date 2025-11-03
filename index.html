@@ -432,7 +432,7 @@ foods.forEach(function(food) {
     if(ballBox.intersectsBox(foodBox)) {
         eatSfx.currentTime = 0;
         eatSfx.play();
-        food.angle = 100;
+        food.angle = Math.random() * 360;
 
         foodBox.getSize(foodSize);
         ballBox.getSize(playerSize);
