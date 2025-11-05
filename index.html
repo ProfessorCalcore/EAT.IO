@@ -67,6 +67,16 @@ overflow: hidden;
     font-size: 20px;
 }
 
+#balls-active{
+    position: absolute;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    top: 0%;
+    left: 50%;
+}
+
+
 #metallic-balls-swallowed-label{
     position: absolute;
     background-color: black;
@@ -165,6 +175,7 @@ overflow: hidden;
 
 <label id="balls-swallowed-label">Balls Swallowed: 0</label>
 <label id="metallic-balls-swallowed-label">Metallic Balls Swallowed: 0</label>
+<label id="balls-active">Balls Active:</label>
 
 
 
@@ -221,11 +232,12 @@ const zoomIn2 = document.querySelector("#zoom-in2");
 
 const speedSlider = document.querySelector("#speed-slider");
 const speedLabel2 = document.querySelector("#speed-label2");
+
+const ballsActive = document.querySelector("#balls-active");
 // ========================
 // ⚙️VARIABLES⚙️
 // ========================
-let helper;
-
+let rebirthCost = 5;
 
 let angle = 0;
 let speed = 0.05;
@@ -294,7 +306,7 @@ speedSlider.addEventListener("input", function() {
 });
 
 
-
+let boxHelper;
 // ========================
 // ⬆️DISPLAYS MOBILE BUTTONS⬆️
 // ========================
@@ -313,9 +325,8 @@ upgradeSpeedButton.addEventListener("click", function() {
         metallicBallsSwallowedLabel.textContent = "Metallic Balls Swallowed: " + metallicBalls;
         speedCost += 5;
         upgradeSpeedButton.textContent = "Upgrade Speed: " + speedCost + " Metallic Orbs";
-        speed += 0.02;
+        maxSpeed += 0.02;
         speedLabel.textContent = "Speed: " + speed;
-        maxSpeed = speed;
         speedSlider.max = maxSpeed;
         speedSlider.value = speed;
         speedLabel2.textContent = "Speed: " + speed;
@@ -406,12 +417,15 @@ scene.add(light);
 const foods = [];
 
 
-    let maxf = 30;
-    let minf = -30;
+    let maxf = 10;
+    let minf = -10;
 // ========================
 // 🟡FOOD SET UP🟡
 // ========================
-for(let i=0; i < 100; i++) {
+let randomi = Math.floor(Math.random() * 200 + 10);
+
+
+for(let i=0; i < randomi; i++) {
     const foodGeo = new THREE.SphereGeometry(0.1, 10, 10);
 
     const foodMat = new THREE.MeshBasicMaterial({color: "white"});
@@ -424,9 +438,11 @@ for(let i=0; i < 100; i++) {
 
     food.position.set(randomx, 5, randomz);
     food.orbit = food.position.clone();
-    food.speed = Math.random() * (0.000005 - (-0.000001)) + (-0.000001);
+    food.speed = Math.random() * (0.0000005 - (-0.0000001)) + (-0.0000001);
     foods.push(food);
     scene.add(food);
+    maxf += 1;
+    minf -= 1;
 
 }
 // ========================
@@ -438,6 +454,9 @@ foods.forEach(function(food) {
 });
     let max = 40;
     let min = -40;
+
+let metals = [];
+let boxMade = false;
 // ========================
 // 🧬RECREATE FOOD FUNCTION🧬
 // ========================
@@ -481,10 +500,17 @@ let randomColor = Math.floor(Math.random() * colors.length);
 
     const foodBox = new THREE.Box3().setFromObject(food)
     foods.push(food);
+    metals.push(food);
+
+
+
+    
     scene.add(food);
-    min -= 1;
-    max += 1;
+    min -= 10;
+    max += 10;
     console.log(min, max);
+    ballsActive.textContent = "Balls Active: " + foods.length;
+    
 }
 
 foods.forEach(function(food) {
@@ -492,12 +518,12 @@ foods.forEach(function(food) {
     food.angle = randomAngle;
 
 });
+
 // ========================
 // 🎬ANIMATION FUNCTION🎬
 // ========================
 function animate() {
     requestAnimationFrame(animate);
-
 
 
 
@@ -516,9 +542,13 @@ foods.forEach(function(food) {
 
         foodBox.getSize(foodSize);
         ballBox.getSize(playerSize);
-        if(playerSize.x/2 >= 8) {
-            playerSprite.scale.multiplyScalar(0.25);
+        if(playerSize.x/2 >= rebirthCost) {
+            rebirthCost += 5;
+            playerSprite.scale.multiplyScalar(0.001);
             speed *= 3;
+            maxSpeed *= 3;
+            speedSlider.max = maxSpeed;
+            speedSlide.value = maxSpeed;
             alert("You now have triple! speed!");
             speedLabel.textContent = "Speed: " + speed;
             originalRadius /= 4;
@@ -559,6 +589,14 @@ foods.forEach(function(food) {
 
         food.position.set(randomx, 5, randomz);      
         if(foodSize.x/2 < 0.12 && foods.length < 1000) recreateFood();
+        if(foodSize.x/2 > 0.2) {
+            scene.remove(foods[foods.length-1]);
+            foods.pop();
+            scene.remove(foods[foods.length-1]);
+            foods.pop(); 
+      
+        }
+        
 
     }
 
