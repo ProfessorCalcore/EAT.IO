@@ -100,6 +100,57 @@ overflow: hidden;
     font-size: 20px;
 }
 
+#zoom-out{
+    position: absolute;
+    font-size: 20px;
+    background-color: black;
+    color: white;
+    right: 0%;
+}
+#zoom-in{
+    position: absolute;
+    font-size: 20px;
+    background-color: black;
+    color: white;
+    right: 0%;
+    top: 5%;
+}
+
+#zoom-out2{
+    position: absolute;
+    font-size: 20px;
+    background-color: black;
+    color: white;
+    right: 0%;
+    top: 10%;
+}
+#zoom-in2{
+    position: absolute;
+ 	   font-size: 20px;
+    background-color: black;
+    color: white;
+    right: 0%;
+    top: 15%;
+}
+#speed-slider{
+    position: absolute;
+    background-color: black;
+    color: white;
+    right: 0%;
+    top: 95%;
+}
+#speed-label2{
+    position: absolute;
+    background: transparent
+    color: white;
+    right: 1%;
+    top: 92%;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+
 </style>
 
     </head>
@@ -118,11 +169,19 @@ overflow: hidden;
 
 
 <label id="size-label">Size: 0.12</label>
-<label id="speed-label">Speed: 0.05</label>
+<label id="speed-label" placeholder="set speed">Speed: 0.05</label>
 
 
 <button id="upgrade-speed-button">Upgrade Speed: 1 Metallic Orb</button>
 <audio id="eat-sfx" src="https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/pop-423717.mp3" preload="auto"></audio>
+<button id="zoom-out">+ Cam Height</button>
+<button id="zoom-in">- Cam Height</button>
+
+<button id="zoom-out2">+ Cam Radius</button>
+<button id="zoom-in2">- Cam Radius</button>
+
+<label id="speed-label2">Speed: 0.05</label>
+<input type="range" id="speed-slider" min="0" max="0.05" value="0.05" step="0.001"/>
 
 
 
@@ -131,6 +190,11 @@ overflow: hidden;
 // ⚙️THREE.JS⚙️
 // ======================== 
 import * as THREE from "https://unpkg.com/three@0.170.0/build/three.module.js";
+import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+
+// ========================
+// ⚙️GRAVITY SET UP⚙️
+// ======================== 
 
 
 // ========================
@@ -149,12 +213,26 @@ const metallicBallsSwallowedLabel = document.querySelector("#metallic-balls-swal
 const upgradeSpeedButton = document.querySelector("#upgrade-speed-button");
 
 const eatSfx = document.querySelector("#eat-sfx");
+const zoomOut = document.querySelector("#zoom-out");
+const zoomIn = document.querySelector("#zoom-in");
 
+const zoomOut2 = document.querySelector("#zoom-out2");
+const zoomIn2 = document.querySelector("#zoom-in2");
+
+const speedSlider = document.querySelector("#speed-slider");
+const speedLabel2 = document.querySelector("#speed-label2");
 // ========================
 // ⚙️VARIABLES⚙️
 // ========================
+let helper;
+
+
 let angle = 0;
 let speed = 0.05;
+let camHeight = 3;
+
+let maxSpeed = speed;
+
 let camAngle = 0;
 let camRadius = 5;
 let currentFood = null;
@@ -163,7 +241,7 @@ let ballsSwallowed = 0;
 let originalRadius = 0.12;
 const foodSize = new THREE.Vector3();
 const playerSize = new THREE.Vector3();
-let metallicBalls = 0;
+let metallicBalls = 1000;
 let speedCost = 1;
 let sunDied = false;
 let colors = [
@@ -195,6 +273,26 @@ let colors = [
   "yellowgreen","rebeccapurple","aliceblue","antiquewhite","aquamarine","azure"
 ];
 
+zoomOut.addEventListener("click", function() {
+    camHeight += 1;
+});
+zoomIn.addEventListener("click", function() {
+    camHeight -= 1;
+});
+
+zoomOut2.addEventListener("click", function() {
+    camRadius += 1;
+});
+zoomIn2.addEventListener("click", function() {
+    camRadius -= 1;
+});
+
+speedSlider.addEventListener("input", function() {
+    speed = Number(speedSlider.value);
+    speed = Number(speed.toFixed(2));
+    speedLabel2.textContent = "Speed: " + speed;
+});
+
 
 
 // ========================
@@ -213,10 +311,14 @@ upgradeSpeedButton.addEventListener("click", function() {
     if(metallicBalls >= speedCost) {
         metallicBalls -= speedCost;
         metallicBallsSwallowedLabel.textContent = "Metallic Balls Swallowed: " + metallicBalls;
-        speedCost *= 5;
+        speedCost += 5;
         upgradeSpeedButton.textContent = "Upgrade Speed: " + speedCost + " Metallic Orbs";
-        speed += 0.01;
+        speed += 0.02;
         speedLabel.textContent = "Speed: " + speed;
+        maxSpeed = speed;
+        speedSlider.max = maxSpeed;
+        speedSlider.value = speed;
+        speedLabel2.textContent = "Speed: " + speed;
 
     }
 });
@@ -255,11 +357,15 @@ left.addEventListener("touchend", function() {
 // ========================
 const scene = new THREE.Scene();
 scene.background = new THREE.Color("rgb(135, 206, 235)");
-const camera = new THREE.PerspectiveCamera(85, window.innerWidth/ window.innerHeight, 1, 1000);
+const camera = new THREE.PerspectiveCamera(85, window.innerWidth/ window.innerHeight, 1, 900);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+// ========================
+// PRACTICE CUBE
+// ========================
 
 // ========================
 // ☀️SUN SET UP☀️
@@ -297,54 +403,11 @@ const light = new THREE.PointLight("white", 50000000, 10000);
 light.position.copy(sun.position);
 light.position.z += 10;
 scene.add(light);
-
-// ========================
-// 🟩FLOOR SET UP🟩
-// ========================
-let randomfloorcolor = Math.floor(Math.random() * colors.length);
-const floorGeometry = new THREE.PlaneGeometry(200,400,200);
-const floorMaterial = new THREE.MeshStandardMaterial({
-color: "lime",
-side: THREE.DoubleSide,
-roughness: 0.1,
-metalness: 0.9,
-});
-const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.rotation.x = Math.PI/2;
-scene.add(floor);
-
-
-// ========================
-// Wall SET UP
-// ========================
-const wallGeo = new THREE.PlaneGeometry(200,4);
-const wallMat = new THREE.MeshBasicMaterial({color: "black"});
-const wallGeo2 = new THREE.PlaneGeometry(400,4);
-
-const nwall = new THREE.Mesh(wallGeo, wallMat);
-nwall.position.z -= 200;
-nwall.position.y += 2;
-
-const swall = new THREE.Mesh(wallGeo, wallMat);
-swall.position.z += 200;
-swall.position.y += 2;
-swall.rotation.y = Math.PI;
-
-const ewall = new THREE.Mesh(wallGeo2, wallMat);
-ewall.position.x += 100;
-ewall.position.y += 2;
-ewall.rotation.y = -Math.PI/2;
-
-const wwall = new THREE.Mesh(wallGeo2, wallMat);
-wwall.position.x -= 100;
-wwall.position.y += 2;
-wwall.rotation.y = Math.PI/2;
-
-
-scene.add(nwall, ewall, wwall);
-
-
 const foods = [];
+
+
+    let maxf = 30;
+    let minf = -30;
 // ========================
 // 🟡FOOD SET UP🟡
 // ========================
@@ -354,16 +417,17 @@ for(let i=0; i < 100; i++) {
     const foodMat = new THREE.MeshBasicMaterial({color: "white"});
     const food = new THREE.Mesh(foodGeo, foodMat);
 
-    let max = 50;
-    let min = -50;
+  
 
-    let randomx = Math.floor(Math.random() * (max-min) + min);
-    let randomz = Math.floor(Math.random() * ((max*2)-min) + min);
+    let randomx = Math.floor(Math.random() * (maxf-minf) + minf);
+    let randomz = Math.floor(Math.random() * ((maxf*2)-minf) + minf);
 
     food.position.set(randomx, 5, randomz);
     food.orbit = food.position.clone();
+    food.speed = Math.random() * (0.000005 - (-0.000001)) + (-0.000001);
     foods.push(food);
     scene.add(food);
+
 }
 // ========================
 // 📦BOX BOUNDARY📦
@@ -372,22 +436,25 @@ const ballBox = new THREE.Box3().setFromObject(playerSprite);
 foods.forEach(function(food) {
     const foodBox = new THREE.Box3().setFromObject(food);
 });
-    let max = 100;
-    let min = -100;
+    let max = 40;
+    let min = -40;
 // ========================
 // 🧬RECREATE FOOD FUNCTION🧬
 // ========================
 function recreateFood() {
     ballsSwallowed += 1;
+     maxf += 1;
+     minf -= 1;
     ballsSwallowedLabel.textContent = "Balls Swallowed: " + ballsSwallowed; 
 
+    
 
 
 
 let randomColor = Math.floor(Math.random() * colors.length);
     ballBox.getSize(playerSize);
-    let minr = playerSize.x/5;
-    let maxr = playerSize.x * 5;
+    let minr = playerSize.x/4;
+    let maxr = playerSize.x * 4;
 
     let playerRadius = playerSprite.geometry.parameters.radius;
     let randomr = Math.random() * (maxr - minr) + minr;
@@ -405,25 +472,38 @@ let randomColor = Math.floor(Math.random() * colors.length);
 
     food.position.set(randomx,5,randomz);
     food.orbit = food.position.clone();
-    food.angle = Math.random() * 360;
+    let minSpeed = 0.0000001;
+    let maxSpeed = 0.0000009;
+    food.speed = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+    let angmax = 360;
+    let angmin = -360;
+    food.angle = Math.random() * (angmax - angmin) + angmin;
 
     const foodBox = new THREE.Box3().setFromObject(food)
     foods.push(food);
     scene.add(food);
+    min -= 1;
+    max += 1;
+    console.log(min, max);
 }
 
 foods.forEach(function(food) {
     let randomAngle = Math.random() * 360;
     food.angle = randomAngle;
-});
 
+});
 // ========================
 // 🎬ANIMATION FUNCTION🎬
 // ========================
 function animate() {
     requestAnimationFrame(animate);
-    const sunBox = new THREE.Box3().setFromObject(sun);
 
+
+
+
+
+
+    const sunBox = new THREE.Box3().setFromObject(sun);
     ballBox.setFromObject(playerSprite);
 foods.forEach(function(food) {
     const foodBox = new THREE.Box3().setFromObject(food);
@@ -436,9 +516,19 @@ foods.forEach(function(food) {
 
         foodBox.getSize(foodSize);
         ballBox.getSize(playerSize);
+        if(playerSize.x/2 >= 8) {
+            playerSprite.scale.multiplyScalar(0.25);
+            speed *= 3;
+            alert("You now have triple! speed!");
+            speedLabel.textContent = "Speed: " + speed;
+            originalRadius /= 4;
+            sizeLabel.textContent = "Size: " + (originalRadius);
+        }
 
-        let scale = 1 + (foodSize.x/20);
-        if(scale >= 1.25) scale = 1.25;
+     
+
+        let scale = 1 + (foodSize.x/15);
+        if(scale >= 1.15) scale = 1.15;
         playerSprite.scale.multiplyScalar(scale);
         originalRadius = originalRadius * scale;
         originalRadius = originalRadius.toFixed(4);
@@ -462,13 +552,13 @@ foods.forEach(function(food) {
 	let max = 50
         let min = -50;
         ballBox.getSize(playerSize);
-        camRadius = playerSize.x + 4;
+        
 
         let randomx = Math.floor(Math.random() * (max-min) + min);
         let randomz = Math.floor(Math.random() * (max - min) + min);
 
         food.position.set(randomx, 5, randomz);      
-        recreateFood();
+        if(foodSize.x/2 < 0.12 && foods.length < 1000) recreateFood();
 
     }
 
@@ -483,12 +573,14 @@ foods.forEach(function(food) {
 
 
 
+
     foods.forEach(function(food) {
         if(!food.orbit) return;
-        food.angle += 0.000003;
+        food.angle += food.speed; ;
         food.position.x = food.orbit.x + 50 * Math.cos(food.angle);
         food.position.z = food.orbit.z + 50 * Math.sin(food.angle);
     });
+
 
 
 });
@@ -496,7 +588,6 @@ foods.forEach(function(food) {
 
 
 
-    let camHeight = 3;
 
     camera.position.x = playerSprite.position.x + camRadius * Math.sin(camAngle);
     camera.position.z = playerSprite.position.z + camRadius * Math.cos(camAngle);
