@@ -665,6 +665,9 @@ const line = new THREE.Line(lgeometry, lmaterial);
 scene.add(line);
 
 
+
+
+
 // ========================
 // 🎬ANIMATION FUNCTION🎬
 // ========================
@@ -675,8 +678,7 @@ function animate() {
 points.push(playerSprite.position.clone());
 line.geometry.dispose();
 line.geometry = new THREE.BufferGeometry().setFromPoints(points)
-if(points.length > 1000) points.shift();
-
+if(points.length > 100000) points.shift();
 
 
 
