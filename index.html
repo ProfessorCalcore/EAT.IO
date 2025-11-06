@@ -395,6 +395,7 @@ upgradeSpeedButton.addEventListener("click", function() {
         speedCost += 5;
         upgradeSpeedButton.textContent = "Upgrade Speed: " + speedCost + " Metallic Orbs";
         maxSpeed += 0.02;
+		speed = maxSpeed;
         speedLabel.textContent = "Speed: " + speed;
         speedSlider.max = maxSpeed;
         speedSlider.value = speed;
@@ -879,6 +880,7 @@ animate();
 </script>
     </body>
 </html>
+
 
 
 
