@@ -383,8 +383,8 @@ document.body.appendChild(renderer.domElement);
 // ========================
 const sunGeometry = new THREE.SphereGeometry(5,100,100);
 const sunMaterial = new THREE.MeshStandardMaterial({
-color: "white",
-emissive: "white",
+color: "yellow",
+emissive: "yellow",
 emissiveIntensity: 100,
 });
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
@@ -636,7 +636,7 @@ foods.forEach(function(food) {
     const orbitRadius = 800;
 
     sun.position.z = orbitRadius * Math.cos(angle);
-    sun.position.y = orbitRadius * Math.sin(angle);
+    sun.position.x = orbitRadius * Math.sin(angle);
     if(sun.position.y < -5 && !sunDied) scene.background = new THREE.Color("#04081c");
     else if(sun.position.y >= -4 && !sunDied) scene.background = new THREE.Color("skyblue");
     if(!sunDied) light.position.copy(sun.position);
