@@ -434,12 +434,11 @@ left.addEventListener("touchend", function() {
     keys["ArrowLeft"] = false;
 });
 
-
+ 
 // ========================
 // 🎬SCENE, CAMERA AND RENDERER SETUP🎬
 // ========================
 const scene = new THREE.Scene();
-
 const textureLoader = new THREE.TextureLoader();
 const earthTexture = textureLoader.load("https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/earth-11048_1280.jpg");
 const moonTexture = textureLoader.load("https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/super-full-moon-2016-1826417_1280_resized.jpg");
@@ -451,7 +450,7 @@ moonTexture.offset.y = -0.2;
 
 
 scene.background = new THREE.Color("rgb(135, 206, 235)");
-const camera = new THREE.PerspectiveCamera(85, window.innerWidth/ window.innerHeight, 1, 900);
+const camera = new THREE.PerspectiveCamera(85, window.innerWidth/ window.innerHeight, 1, 90000);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -464,7 +463,7 @@ document.body.appendChild(renderer.domElement);
 // ========================
 // ☀️SUN SET UP☀️
 // ========================
-const sunGeometry = new THREE.SphereGeometry(100,100,100);
+const sunGeometry = new THREE.SphereGeometry(900,100,100);
 const sunMaterial = new THREE.MeshStandardMaterial({
 color: "#D4D4A6",
 emissive: "#D4D4A6",
@@ -500,7 +499,7 @@ scene.add(playerSprite);
 // ========================
 // 💡LIGHT SET UP💡
 // ========================
-const light = new THREE.PointLight("white", 5000000, 100000);
+const light = new THREE.PointLight("white", 500000000, 100000);
 light.position.copy(sun.position);
 light.position.z += 10;
 scene.add(light);
@@ -659,12 +658,13 @@ function lightSpeedFunction() {
     }, 10000);
 }
 
-
 // ========================
 // 🎬ANIMATION FUNCTION🎬
 // ========================
 function animate() {
     requestAnimationFrame(animate);
+console.log(sun.position.z);
+
 
 
 
@@ -794,6 +794,7 @@ foods.forEach(function(food) {
         light.position.copy(playerSprite.position);
         light.intensity = 500;
         scene.background = new THREE.Color("black");
+        speedLabel2.style.color = "white";
         
     }
     
@@ -830,8 +831,8 @@ foods.forEach(function(food) {
     camera.position.y = playerSprite.position.y + camHeight;
     camera.lookAt(playerSprite.position);
 
-    angle += 0.0002;
-    const orbitRadius = 800;
+    angle += 0.00007;
+    const orbitRadius = 8000;
 
     sun.position.z = orbitRadius * Math.cos(angle);
     sun.position.x = orbitRadius * Math.sin(angle);
