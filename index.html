@@ -101,12 +101,20 @@ overflow: hidden;
     top: 15%;
 }
 
+#lives-label{
+    position: absolute;
+    background-color: black;
+    color: white;
+    top: 20%;
+    font-size: 20px;
+}
+
 
 #upgrade-speed-button{
     position: absolute;
     background-color: black;
     color: white;
-    top: 20%;
+    top: 25%;
     font-size: 20px;
 }
 
@@ -159,6 +167,37 @@ overflow: hidden;
     font-weight: bold;
 }
 
+#hyperdrive{
+    position: absolute;
+    background-color: black;
+    font-size: 50px;
+    border-radius : 100%;
+    bottom: 25%;
+    display: none;
+    
+}
+
+#respawn{
+    position: absolute;
+    background-color: black;
+    font-size: 50px;
+    border-radius : 100%;
+    bottom: 5%;
+    display: inline;
+    
+}
+
+#dash{
+    position: absolute;
+    background-color: black;
+    font-size: 50px;
+    border-radius : 100%;
+    bottom: 15%;
+    display: inline;
+    
+}
+
+
 
 
 </style>
@@ -180,11 +219,15 @@ overflow: hidden;
 
 
 <label id="size-label">Size: 0.12</label>
+<label id="lives-label">Lives: 0</label>
+
 <label id="speed-label" placeholder="set speed">Speed: 0.05</label>
 
 
 <button id="upgrade-speed-button">Upgrade Speed: 1 Metallic Orb</button>
 <audio id="eat-sfx" src="https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/pop-423717.mp3" preload="auto"></audio>
+<audio id="hyperdrive-sfx" src="https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/starship-rail-gun-charge-35904.mp3" preload="auto"></audio>
+
 <button id="zoom-out">+ Cam Height</button>
 <button id="zoom-in">- Cam Height</button>
 
@@ -193,6 +236,11 @@ overflow: hidden;
 
 <label id="speed-label2">Speed: 0.05</label>
 <input type="range" id="speed-slider" min="0" max="0.05" value="0.05" step="0.001"/>
+<button id="hyperdrive">🚀</button>
+<button id="dash">💨</button>
+<button id="respawn">🔄</button>
+
+
 
 
 
@@ -217,9 +265,11 @@ const down = document.querySelector("#down");
 const left = document.querySelector("#left");
 const right = document.querySelector("#right");
 
+const hyperdriveSfx = document.querySelector("#hyperdrive-sfx");
 const ballsSwallowedLabel = document.querySelector("#balls-swallowed-label");
 const sizeLabel = document.querySelector("#size-label");
 const speedLabel = document.querySelector("#speed-label");
+const livesLabel = document.querySelector("#lives-label");
 const metallicBallsSwallowedLabel = document.querySelector("#metallic-balls-swallowed-label");
 const upgradeSpeedButton = document.querySelector("#upgrade-speed-button");
 
@@ -234,10 +284,29 @@ const speedSlider = document.querySelector("#speed-slider");
 const speedLabel2 = document.querySelector("#speed-label2");
 
 const ballsActive = document.querySelector("#balls-active");
+const hyperdrive = document.querySelector("#hyperdrive");
+
+const respawn = document.querySelector("#respawn");
+respawn.addEventListener("click", function() {
+    playerSprite.position.set(0,5,0);
+});
+const dash = document.querySelector("#dash");
+dash.addEventListener("click", function() {
+    playerSprite.position.z -= Math.cos(camAngle) * 55;
+    playerSprite.position.x -= Math.sin(camAngle) * 55;
+    dash.style.display = "none";
+    setTimeout(function() {
+        dash.style.display = "inline";
+    }, 30000);
+});
 // ========================
 // ⚙️VARIABLES⚙️
 // ========================
 let rebirthCost = 5;
+let livesx = 0;
+let hyperdriveActive = false;
+
+
 
 let angle = 0;
 let speed = 0.05;
@@ -363,10 +432,22 @@ left.addEventListener("touchend", function() {
     keys["ArrowLeft"] = false;
 });
 
+
 // ========================
 // 🎬SCENE, CAMERA AND RENDERER SETUP🎬
 // ========================
 const scene = new THREE.Scene();
+
+const textureLoader = new THREE.TextureLoader();
+const earthTexture = textureLoader.load("https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/earth-11048_1280.jpg");
+const moonTexture = textureLoader.load("https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/super-full-moon-2016-1826417_1280_resized.jpg");
+moonTexture.offset.y = -0.2;
+
+
+
+
+
+
 scene.background = new THREE.Color("rgb(135, 206, 235)");
 const camera = new THREE.PerspectiveCamera(85, window.innerWidth/ window.innerHeight, 1, 900);
 
@@ -381,15 +462,21 @@ document.body.appendChild(renderer.domElement);
 // ========================
 // ☀️SUN SET UP☀️
 // ========================
-const sunGeometry = new THREE.SphereGeometry(5,100,100);
+const sunGeometry = new THREE.SphereGeometry(100,100,100);
 const sunMaterial = new THREE.MeshStandardMaterial({
-color: "yellow",
-emissive: "yellow",
+color: "#D4D4A6",
+emissive: "#D4D4A6",
 emissiveIntensity: 100,
 });
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 sun.position.set(0,10,-1000)
 scene.add(sun);
+
+
+
+
+
+
 
 // ========================
 // 🔴PLAYER-SPRITE SET UP🔴
@@ -398,7 +485,8 @@ const playerGeometry = new THREE.SphereGeometry(0.12,100,100);
 const playerMaterial = new THREE.MeshStandardMaterial({
     color: "silver",
     roughness: 0,
-    metalness: 1,
+    metalness: 0,
+    map: earthTexture,
    
 
 });
@@ -410,7 +498,7 @@ scene.add(playerSprite);
 // ========================
 // 💡LIGHT SET UP💡
 // ========================
-const light = new THREE.PointLight("white", 50000000, 10000);
+const light = new THREE.PointLight("white", 5000000, 100000);
 light.position.copy(sun.position);
 light.position.z += 10;
 scene.add(light);
@@ -450,7 +538,7 @@ for(let i=0; i < randomi; i++) {
 // ========================
 const ballBox = new THREE.Box3().setFromObject(playerSprite);
 foods.forEach(function(food) {
-    const foodBox = new THREE.Box3().setFromObject(food);
+const foodBox = new THREE.Box3().setFromObject(food);
 });
     let max = 40;
     let min = -40;
@@ -472,25 +560,28 @@ function recreateFood() {
 
 let randomColor = Math.floor(Math.random() * colors.length);
     ballBox.getSize(playerSize);
-    let minr = playerSize.x/4;
-    let maxr = playerSize.x * 4;
+    let minr = playerSize.x/5;
+    let maxr = playerSize.x * 5;
 
     let playerRadius = playerSprite.geometry.parameters.radius;
     let randomr = Math.random() * (maxr - minr) + minr;
 
     const foodGeo = new THREE.SphereGeometry(randomr,100,100);
     const foodMat = new THREE.MeshStandardMaterial({
-        color: colors[randomColor],
+        color: colors[Math.floor(Math.random() * colors.length)],
 	roughness: 0,
-	metalness: 1,
+	metalness: 0.9,
     });
     const food = new THREE.Mesh(foodGeo, foodMat);
 
     let randomx = Math.floor(Math.random() * (max - min) + min);
     let randomz = Math.floor(Math.random() * (max - min) + min);
+    min -= 2;
+    max += 2;
 
     food.position.set(randomx,5,randomz);
-    food.orbit = food.position.clone();
+    food.orbit = new THREE.Vector3(randomx, 5, randomz)
+    
     let minSpeed = 0.0000001;
     let maxSpeed = 0.0000009;
     food.speed = Math.random() * (maxSpeed - minSpeed) + minSpeed;
@@ -501,14 +592,13 @@ let randomColor = Math.floor(Math.random() * colors.length);
     const foodBox = new THREE.Box3().setFromObject(food)
     foods.push(food);
     metals.push(food);
+    console.log(food.position);
 
 
 
     
     scene.add(food);
-    min -= 1;
-    max += 1;
-    console.log(min, max);
+
     ballsActive.textContent = "Balls Active: " + foods.length;
     
 }
@@ -519,12 +609,82 @@ foods.forEach(function(food) {
 
 });
 
+let lives = [];
+
+// ========================
+// Lives
+// ========================
+function livesPickUpFunction() {
+    const livesGeo = new THREE.TorusKnotGeometry(10,1,200,40);
+    const livesMat = new THREE.MeshStandardMaterial({
+    color: "red",
+    roughness: 0,
+    metalness: 0.5,
+    });
+    const livesBox = new THREE.Mesh(livesGeo, livesMat);
+    
+    let randomxx = Math.floor(Math.random() * 200 - 100);
+    let randomzz = Math.floor(Math.random() * 200 - 100);  
+
+    livesBox.position.set(randomxx,5,randomzz);
+    lives.push(livesBox);
+    scene.add(livesBox);
+
+  
+}
+
+hyperdrive.addEventListener("click", function() {
+    lightSpeedFunction();
+    hyperdrive.style.display = "none";
+
+});
+
+
+let hyperSpeedInMotion = false;
+function lightSpeedFunction() {
+    hyperSpeedInMotion = true;
+    hyperdriveSfx.currentTime = 0;
+    hyperdriveSfx.play();
+    maxSpeed *= 10;
+    speed = maxSpeed;
+    speedLabel.textContent = "Speed: " + speed;
+    setTimeout(function() {
+        maxSpeed /= 10;
+        speed = maxSpeed;
+        speedLabel.textContent = "Speed: " + speed;
+        hyperSpeedInMotion = false;
+
+    }, 10000);
+}
+
+
 // ========================
 // 🎬ANIMATION FUNCTION🎬
 // ========================
 function animate() {
     requestAnimationFrame(animate);
 
+
+
+    
+   lives.forEach(function(life, i) {
+        life.rotation.x += 0.001;
+        life.rotation.y += 0.001;
+        life.rotation.z += 0.001; 
+        life.position.x += 0.02;
+        life.position.z += 0.03;
+
+        const lifeBox = new THREE.Box3().setFromObject(life);
+         if(lifeBox.intersectsBox(ballBox)) {
+             scene.remove(life);
+             life.geometry.dispose();
+             life.material.dispose();
+             lives.splice(i, 1);
+    		alert("Life Added!");
+    		livesx += 1;
+    		livesLabel.textContent = "Lives: " + livesx;
+         }
+    });
 
 
 
@@ -536,6 +696,14 @@ foods.forEach(function(food) {
 
 
     if(ballBox.intersectsBox(foodBox)) {
+        let livesChance = Math.floor(Math.random() * 200);
+        let lightSpeedChance = Math.floor(Math.random() * 200);
+
+        if(livesChance <= 1) livesPickUpFunction(); 
+        if(lightSpeedChance <= 200) hyperdrive.style.display = "inline";
+
+
+
         eatSfx.currentTime = 0;
         eatSfx.play();
         food.angle = Math.random() * 360;
@@ -564,13 +732,19 @@ foods.forEach(function(food) {
         originalRadius = originalRadius.toFixed(4);
         sizeLabel.textContent = "Size: " + originalRadius;
 
- 
 
 
-        if(foodSize.x /2 > playerSize.x /2) {
+
+        if(foodSize.x /2 > playerSize.x /2 && livesx <= 0) {
             alert("You got eaten! Game Over");
             alert("Balls Swallowed: " + ballsSwallowed)
             location.reload();
+        }
+
+        if(foodSize.x/2 > playerSize.x/2 && livesx > 0) {
+     	    livesx -= 1;
+            livesLabel.textContent = "Lives: " + livesx;
+            alert("Woah..that was a close one... -1 life!");
         }
 
         if(foodSize.x/2 > 0.11) {
@@ -587,11 +761,22 @@ foods.forEach(function(food) {
         let randomx = Math.floor(Math.random() * (max-min) + min);
         let randomz = Math.floor(Math.random() * (max - min) + min);
 
-        food.position.set(randomx, 5, randomz);      
+        max += 2;
+        min -= 2;
+
+        food.position.set(randomx, 5, randomz);    
+        console.log(food.position);
+        console.log("!");
+  
         if(foodSize.x/2 < 0.12 && foods.length < 1000) recreateFood();
         if(foodSize.x/2 > 0.2) {
+            foods[foods.length-1].geometry.dispose();
+            foods[foods.length-1].material.dispose();
             scene.remove(foods[foods.length-1]);
             foods.pop();
+
+            foods[foods.length-1].geometry.dispose();
+            foods[foods.length-1].material.dispose();
             scene.remove(foods[foods.length-1]);
             foods.pop(); 
       
@@ -608,6 +793,11 @@ foods.forEach(function(food) {
         scene.background = new THREE.Color("black");
         
     }
+    
+    if(sunDied) {
+    light.position.copy(playerSprite.position);
+    }
+
 
 
 
@@ -632,7 +822,7 @@ foods.forEach(function(food) {
     camera.position.y = playerSprite.position.y + camHeight;
     camera.lookAt(playerSprite.position);
 
-    angle += 0.00002;
+    angle += 0.0002;
     const orbitRadius = 800;
 
     sun.position.z = orbitRadius * Math.cos(angle);
@@ -684,7 +874,6 @@ animate();
 </script>
     </body>
 </html>
-
 
 
 
