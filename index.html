@@ -657,13 +657,26 @@ function lightSpeedFunction() {
 
     }, 10000);
 }
+const points = [playerSprite.position.clone()];
+
+const lgeometry = new THREE.BufferGeometry().setFromPoints(points);
+const lmaterial = new THREE.LineBasicMaterial({color: "black"});
+const line = new THREE.Line(lgeometry, lmaterial);
+scene.add(line);
+
 
 // ========================
 // 🎬ANIMATION FUNCTION🎬
 // ========================
 function animate() {
     requestAnimationFrame(animate);
-console.log(sun.position.z);
+
+
+points.push(playerSprite.position.clone());
+line.geometry.dispose();
+line.geometry = new THREE.BufferGeometry().setFromPoints(points)
+if(points.length > 1000) points.shift();
+
 
 
 
