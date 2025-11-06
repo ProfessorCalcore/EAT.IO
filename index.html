@@ -789,13 +789,18 @@ foods.forEach(function(food) {
         scene.remove(sun); 
         sunDied = true;
         light.position.copy(playerSprite.position);
-        light.intensity = 100;
+        light.intensity = 500;
         scene.background = new THREE.Color("black");
         
     }
     
     if(sunDied) {
     light.position.copy(playerSprite.position);
+    light.position.z -= 50;
+    playerSprite.material.emissive = new THREE.Color("white");
+    playerSprite.material.emissiveIntensity = 1;
+    playerSprite.material.emissiveMap = playerSprite.material.map;
+    playerSprite.material.needsUpdate = true;
     }
 
 
