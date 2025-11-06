@@ -371,7 +371,7 @@ zoomIn2.addEventListener("click", function() {
 speedSlider.addEventListener("input", function() {
     speed = Number(speedSlider.value);
     speed = Number(speed.toFixed(2));
-    speedLabel2.textContent = "Speed: " + speed;
+    speedLabel2.textContent = "Speed: " + speed.toFixed(2);
 });
 
 
@@ -395,11 +395,12 @@ upgradeSpeedButton.addEventListener("click", function() {
         speedCost += 5;
         upgradeSpeedButton.textContent = "Upgrade Speed: " + speedCost + " Metallic Orbs";
         maxSpeed += 0.02;
-		speed = maxSpeed;
-        speedLabel.textContent = "Speed: " + speed;
+        speed = maxSpeed;
+
+        speedLabel.textContent = "Speed: " + speed.toFixed(2);
         speedSlider.max = maxSpeed;
         speedSlider.value = speed;
-        speedLabel2.textContent = "Speed: " + speed;
+        speedLabel2.textContent = "Speed: " + speed.toFixed(2);
 
     }
 });
@@ -648,11 +649,11 @@ function lightSpeedFunction() {
     hyperdriveSfx.play();
     maxSpeed *= 10;
     speed = maxSpeed;
-    speedLabel.textContent = "Speed: " + speed;
+    speedLabel.textContent = "Speed: " + speed.toFixed(2);
     setTimeout(function() {
         maxSpeed /= 10;
         speed = maxSpeed;
-        speedLabel.textContent = "Speed: " + speed;
+        speedLabel.textContent = "Speed: " + speed.toFixed(2);
         hyperSpeedInMotion = false;
 
     }, 10000);
@@ -713,14 +714,15 @@ foods.forEach(function(food) {
         ballBox.getSize(playerSize);
         if(playerSize.x/2 >= rebirthCost) {
             rebirthCost += 5;
-            playerSprite.scale.multiplyScalar(0.001);
+            playerSprite.scale.multiplyScalar(0.025);
             speed *= 3;
             maxSpeed *= 3;
             speedSlider.max = maxSpeed;
-            speedSlide.value = maxSpeed;
+            speedSlider.value = maxSpeed;
             alert("You now have triple! speed!");
-            speedLabel.textContent = "Speed: " + speed;
-            originalRadius /= 4;
+            speedLabel.textContent = "Speed: " + speed.toFixed(2);
+            speedLabel2.textContent = "Speed: " + speed.toFixed(2);
+            originalRadius /= 40;
             sizeLabel.textContent = "Size: " + (originalRadius);
         }
 
@@ -880,15 +882,5 @@ animate();
 </script>
     </body>
 </html>
-
-
-
-
-
-
-
-
-
-
 
 
