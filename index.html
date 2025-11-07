@@ -657,12 +657,7 @@ function lightSpeedFunction() {
 
     }, 10000);
 }
-const points = [playerSprite.position.clone()];
 
-const lgeometry = new THREE.BufferGeometry().setFromPoints(points);
-const lmaterial = new THREE.LineBasicMaterial({color: "black"});
-const line = new THREE.Line(lgeometry, lmaterial);
-scene.add(line);
 
 
 
@@ -675,10 +670,7 @@ function animate() {
     requestAnimationFrame(animate);
 
 
-points.push(playerSprite.position.clone());
-line.geometry.dispose();
-line.geometry = new THREE.BufferGeometry().setFromPoints(points)
-if(points.length > 100000) points.shift();
+
 
 
 
