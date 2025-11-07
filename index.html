@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <a href ="https://professorcalcore.github.io/Home/" id="e2">Calcore Studios</a>
+        <a href ="https://professorcalcore.github.io/Split-Seconds/" id="e2">Split Seconds</a>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <title>EAT.IO</title>
 <style>
@@ -19,6 +19,7 @@ overflow: hidden;
     width: 200px;
     height: 100px;
     display: inline;
+   
 }
 
 #up{
@@ -62,38 +63,7 @@ overflow: hidden;
 
 }
 
-#zoom-out{
-    position: absolute;
-    font-size: 20px;
-    background-color: black;
-    color: white;
-    right: 0%;
-}
-#zoom-in{
-    position: absolute;
-    font-size: 20px;
-    background-color: black;
-    color: white;
-    right: 0%;
-    top: 5%;
-}
 
-#zoom-out2{
-    position: absolute;
-    font-size: 20px;
-    background-color: black;
-    color: white;
-    right: 0%;
-    top: 10%;
-}
-#zoom-in2{
-    position: absolute;
- 	   font-size: 20px;
-    background-color: black;
-    color: white;
-    right: 0%;
-    top: 15%;
-}
 #speed-slider{
     position: absolute;
     background-color: black;
@@ -116,8 +86,26 @@ overflow: hidden;
     background-color: black;
     font-size: 50px;
     border-radius : 100%;
-    bottom: 25%;
+    bottom: 45%;
     display: none;
+    
+}
+#upgrade-speed-button{
+    position: absolute;
+    border-radius: 100%;
+    bottom: 35%;
+    background-color: #fff;
+    font-size: 50px;
+    display:none;
+}
+
+#dash{
+    position: absolute;
+    background-color: black;
+    font-size: 50px;
+    border-radius : 100%;
+    bottom: 25%;
+    display: inline;
     
 }
 
@@ -126,17 +114,17 @@ overflow: hidden;
     background-color: black;
     font-size: 50px;
     border-radius : 100%;
-    bottom: 5%;
+    bottom: 15%;
     display: inline;
     
 }
 
-#dash{
+#settings{
     position: absolute;
     background-color: black;
     font-size: 50px;
     border-radius : 100%;
-    bottom: 15%;
+    bottom: 5%;
     display: inline;
     
 }
@@ -159,17 +147,17 @@ overflow: hidden;
 }
 
 #hello{
-    position: absolute;
-    top: 85%;
-    left: 95%;
-    background-color: black;
-    color: white;
+    position: relative;
+    background-color: #222;
+    color: #fff;
+    display: flex;
+    font-size: 20px;
 }
 
 #my-table{
     position: absolute;
-    background-color: black;
-    color: white;
+    background-color: #222;
+    color: #fff;
     top: 0%;
     left: 0%;
     border-collapse: collapse;
@@ -177,14 +165,47 @@ overflow: hidden;
     font-size: 18px;  
 }
 
-#upgrade-speed-button{
+#settings-container{
     position: absolute;
-    border-radius: 100%;
-    bottom: 25%;
-    background-color: black;
-    font-size: 50px;
-    display:none;
+    background-color: #222;  
+    right: 0%;
+    top: 0%;
+    display: none;
 }
+#zoom-out{
+    position: relative;
+    font-size: 20px;
+    background-color: #222;
+    color: #fff;
+    display: flex;
+
+}
+#zoom-in{
+    position: relative;
+    font-size: 20px;
+    background-color: #222;
+    color: #fff;
+    display: flex;
+}
+
+#zoom-out2{
+    position: relative;
+    font-size: 20px;
+    background-color: #222;
+    color: #fff;
+    display: flex;
+
+}
+#zoom-in2{
+    position: relative;
+    font-size: 20px;
+    background-color: #222;
+    color: #fff;
+    display: flex;
+
+
+}
+
 
 </style>
 
@@ -193,7 +214,7 @@ overflow: hidden;
     <body>
 
 <table id="my-table" border=2>
-    <caption border=1 style="background-color: black; color:white; border-collapse: collapse; border: 1px solid white;">📊Stats📊</caption>
+    <caption border=1 style="background-color: #222; color:#fff; border-collapse: collapse; border: 1px solid white;">📊Stats📊</caption>
     <tr>
         <td>⚪Balls Swallowed⚪</td>
         <td id="balls-swallowed-label">0</td>
@@ -232,7 +253,15 @@ overflow: hidden;
     <button id="right">➡️</button>
 </div>
 
-
+<div id="settings-container" style="display: none;">
+    <button id="zoom-out">+ Cam Height</button>
+    <button id="zoom-in">- Cam Height</button>
+    <button id="zoom-out2">+ Cam Radius</button>
+    <button id="zoom-in2">- Cam Radius</button>
+    <label id="hello">Trails
+    <input type="checkbox" id="check">
+</label>
+</div>
 
 
 
@@ -242,11 +271,7 @@ overflow: hidden;
 <audio id="eat-sfx" src="https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/pop-423717.mp3" preload="auto"></audio>
 <audio id="hyperdrive-sfx" src="https://raw.githubusercontent.com/ProfessorCalcore/EAT.IO/main/starship-rail-gun-charge-35904.mp3" preload="auto"></audio>
 
-<button id="zoom-out">+ Cam Height</button>
-<button id="zoom-in">- Cam Height</button>
 
-<button id="zoom-out2">+ Cam Radius</button>
-<button id="zoom-in2">- Cam Radius</button>
 
 <label id="speed-label2">Speed: 0.05</label>
 <input type="range" id="speed-slider" min="0" max="0.05" value="0.05" step="0.001"/>
@@ -256,12 +281,9 @@ overflow: hidden;
 <button id="upgrade-speed-button">👟</button>
 
 <input id="commands" placeholder="Enter Command">
-<label id="hello">Trails
-<input type="checkbox" id="check">
-<input type="color" id="color-picker">
-</label>
 
 
+<button id="settings">⚙️</button>
 
 
 
@@ -322,9 +344,26 @@ dash.addEventListener("click", function() {
 });
 
 const commands = document.querySelector("#commands");
+const settings = document.querySelector("#settings");
+const settingsContainer = document.querySelector("#settings-container");
+
+settings.addEventListener("click", function() {
+    if(settingsContainer.style.display === "none") settingsContainer.style.display = "block";
+    else if(settingsContainer.style.display === "block") settingsContainer.style.display = "none";
+
+
+});
+
+const check = document.querySelector("#check");
+check.addEventListener("click", function() {
+    if(!trailsOn) trailsOn = true;    
+    else if(trailsOn) trailsOn = false;
+});
 // ========================
 // ⚙️VARIABLES⚙️
 // ========================
+
+let trailsOn = false;
 let rebirthCost = 5;
 let livesx = 0;
 let hyperdriveActive = false;
@@ -981,6 +1020,8 @@ const points = [playerSprite.position.clone()];
 const lgeometry = new THREE.BufferGeometry().setFromPoints(points);
 const lmaterial = new THREE.LineBasicMaterial({color: "black"});
 const line = new THREE.Line(lgeometry, lmaterial);
+
+
 scene.add(line);
 
 
@@ -993,11 +1034,15 @@ scene.add(line);
 function animate() {
     requestAnimationFrame(animate);
 
-
+if(trailsOn) {
 points.push(playerSprite.position.clone());
 line.geometry.dispose();
 line.geometry = new THREE.BufferGeometry().setFromPoints(points)
 if(points.length > 100000) points.shift();
+
+}
+
+
 
 
 
@@ -1260,7 +1305,5 @@ commands.addEventListener("keydown", function(event) {
 </script>
     </body>
 </html>
-
-
 
 
