@@ -206,6 +206,14 @@ overflow: hidden;
 
 }
 
+#color-picker{
+    position: relative;
+    display: flex;
+    font-size: 20px;
+    color: #fff;
+    background-color: #222;
+}
+
 
 </style>
 
@@ -261,6 +269,10 @@ overflow: hidden;
     <label id="hello">Trails
     <input type="checkbox" id="check">
 </label>
+    <label id="color-picker">Scene Color
+    <input id="color-picker-input" type="color">
+    </label>
+
 </div>
 
 
@@ -302,6 +314,7 @@ import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cann
 // ========================
 // ⚙️GUI SET UP⚙️
 // ========================
+const colorPickerInput = document.querySelector("#color-picker-input");
 const buttonsContainer = document.querySelector("#buttons-container");
 const up = document.querySelector("#up");
 const down = document.querySelector("#down");
@@ -512,11 +525,15 @@ const moonTexture = textureLoader.load("https://raw.githubusercontent.com/Profes
 moonTexture.offset.y = -0.2;
 
 
+colorPickerInput.addEventListener("input", function() {
+    let selectedColor = colorPickerInput.value;
+    scene.background = new THREE.Color(selectedColor);
+    console.log("Color: " + selectedColor);
+
+});
 
 
 
-
-scene.background = new THREE.Color("rgb(135, 206, 235)");
 const camera = new THREE.PerspectiveCamera(85, window.innerWidth/ window.innerHeight, 1, 90000);
 
 const renderer = new THREE.WebGLRenderer();
@@ -955,8 +972,6 @@ foods.forEach(function(food) {
 
     sun.position.z = orbitRadius * Math.cos(angle);
     sun.position.x = orbitRadius * Math.sin(angle);
-    if(sun.position.y < -5 && !sunDied) scene.background = new THREE.Color("#04081c");
-    else if(sun.position.y >= -4 && !sunDied) scene.background = new THREE.Color("skyblue");
     if(!sunDied) light.position.copy(sun.position);
     if(sunDied) light.position.copy(playerSprite.position);
 
@@ -1028,6 +1043,8 @@ commands.addEventListener("keydown", function(event) {
             alert("If you think ima let u use this cheat again...your dead wrong lmao...now go out and suck on those balls...ik u love them");
 	    maxSpeed *= 5;
 	    speed = maxSpeed;
+	    speedSlider.max = maxSpeed;
+	    speedSlide.value = speed;
 	    updateSpeed();   
             livesx += 2;
             updateLives();
