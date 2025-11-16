@@ -834,11 +834,11 @@ foods.forEach(function(food) {
 
 
     if(ballBox.intersectsBox(foodBox)) {
-        let livesChance = Math.floor(Math.random() * 250);
-        let lightSpeedChance = Math.floor(Math.random() * 200);
+        let livesChance = Math.floor(Math.random() * 75);
+        let lightSpeedChance = Math.floor(Math.random() * 50);
 
         if(livesChance <= 1) livesPickUpFunction(); 
-        if(lightSpeedChance <= 2) hyperdrive.style.display = "inline";
+        if(lightSpeedChance <= 1) hyperdrive.style.display = "inline";
 
 
 
@@ -1060,6 +1060,7 @@ commands.addEventListener("keydown", function(event) {
 </script>
     </body>
 </html>
+
 
 
 
