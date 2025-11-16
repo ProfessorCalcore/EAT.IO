@@ -834,7 +834,7 @@ foods.forEach(function(food) {
 
 
     if(ballBox.intersectsBox(foodBox)) {
-        let livesChance = Math.floor(Math.random() * 400);
+        let livesChance = Math.floor(Math.random() * 250);
         let lightSpeedChance = Math.floor(Math.random() * 200);
 
         if(livesChance <= 1) livesPickUpFunction(); 
@@ -1060,5 +1060,6 @@ commands.addEventListener("keydown", function(event) {
 </script>
     </body>
 </html>
+
 
 
